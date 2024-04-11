@@ -521,12 +521,14 @@ impl Conn {
     }
 
     async fn switch_to_ssl_if_needed(&mut self) -> Result<()> {
+        tracing::info!("TEST: switch to ssl");
         if self
             .inner
             .opts
             .get_capabilities()
             .contains(CapabilityFlags::CLIENT_SSL)
         {
+            tracing::info!("TEST: switch to ssl - capabilities done");
             if !self
                 .inner
                 .capabilities
@@ -554,6 +556,9 @@ impl Conn {
                 .unwrap_or_else(|| conn.opts().ip_or_hostname())
                 .into();
             conn.stream_mut()?.make_secure(domain, ssl_opts).await?;
+
+            tracing::info!("TEST: switch to ssl - secure done");
+
             Ok(())
         } else {
             Ok(())
@@ -905,6 +910,7 @@ impl Conn {
     /// Returns a future that resolves to [`Conn`].
     pub fn new<T: Into<Opts>>(opts: T) -> crate::BoxFuture<'static, Conn> {
         let opts = opts.into();
+        tracing::info!("TEST: new");
         async move {
             let mut conn = Conn::empty(opts.clone());
 
@@ -926,6 +932,7 @@ impl Conn {
             conn.setup_stream()?;
             conn.handle_handshake().await?;
             conn.switch_to_ssl_if_needed().await?;
+            tracing::info!("TEST: switch to ssl done");
             conn.do_handshake_response().await?;
             conn.continue_auth().await?;
             conn.switch_to_compression()?;
