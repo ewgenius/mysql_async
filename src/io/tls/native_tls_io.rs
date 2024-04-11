@@ -32,6 +32,7 @@ impl Endpoint {
 
         let mut builder = TlsConnector::builder();
         for root_cert in ssl_opts.load_root_certs().await? {
+            tracing::info!("TEST: root_cert loaded {:?}", root_cert);
             builder.add_root_certificate(root_cert);
         }
 
