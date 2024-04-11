@@ -20,9 +20,13 @@ impl SslOpts {
 
 impl Endpoint {
     pub async fn make_secure(&mut self, domain: String, ssl_opts: SslOpts) -> Result<()> {
+        #[cfg(feature = "tracing")]
+        tracing::info!("TEST: mysql make secure");
+
         #[cfg(unix)]
         if self.is_socket() {
             // won't secure socket connection
+            tracing::info!("TEST: is socket");
             return Ok(());
         }
 
@@ -30,6 +34,8 @@ impl Endpoint {
         for root_cert in ssl_opts.load_root_certs().await? {
             builder.add_root_certificate(root_cert);
         }
+
+        tracing::info!("TEST: certs loaded");
 
         if let Some(client_identity) = ssl_opts.client_identity() {
             builder.identity(client_identity.load().await?);
@@ -48,6 +54,8 @@ impl Endpoint {
             #[cfg(unix)]
             Endpoint::Socket(_) => unreachable!(),
         };
+
+        tracing::info!("TEST: secure done");
 
         Ok(())
     }
