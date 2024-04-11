@@ -9,6 +9,7 @@ impl SslOpts {
     async fn load_root_certs(&self) -> crate::Result<Vec<Certificate>> {
         let mut output = Vec::new();
 
+        tracing::info!("TEST: load root certs");
         for root_cert in self.root_certs() {
             let root_cert_data = root_cert.read().await?;
             output.extend(parse_certs(root_cert_data.as_ref())?);
@@ -32,7 +33,6 @@ impl Endpoint {
 
         let mut builder = TlsConnector::builder();
         for root_cert in ssl_opts.load_root_certs().await? {
-            tracing::info!("TEST: root_cert loaded {:?}", root_cert);
             builder.add_root_certificate(root_cert);
         }
 
@@ -64,6 +64,7 @@ impl Endpoint {
 
 fn parse_certs(buf: &[u8]) -> Result<Vec<Certificate>> {
     Ok(Certificate::from_der(buf).map(|x| vec![x]).or_else(|_| {
+        tracing::info!("TEST: parse certs {:?}", buf);
         pem::parse_many(buf)
             .unwrap_or_default()
             .iter()
